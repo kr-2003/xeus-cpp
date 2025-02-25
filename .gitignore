@@ -45,3 +45,7 @@ bld
 # LLM Implementation
 *_api_key.txt
 *_chat_history.txt
+
+
+*node_modules/
+*_output/
