@@ -1,0 +1,14 @@
+[LiteServeApp] No archive (yet): ui-test-jupyterlite.tgz
+[LiteServeApp]     jupyter-lite.(json|ipynb): 0 files
+[LiteServeApp] WARNING | 
+
+        Serving JupyterLite Debug Server from:
+            /home/abhinav/Desktop/Coding/CERN_HSF_Compiler_Research/xeus-cpp/ui-test/_output
+        on:
+            http://127.0.0.1:8000/index.html
+
+        *** Exit by: ***
+            - Pressing Ctrl+C
+            - Visiting /shutdown
+404 GET /api/contents/all.json (::1) 3.79ms
+Interrupted system call ; error code 4
