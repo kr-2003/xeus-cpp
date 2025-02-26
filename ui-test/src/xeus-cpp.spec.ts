@@ -13,7 +13,6 @@ test.beforeAll(async () => {
     console.error('Failed to build/start JupyterLite:', error.message);
     throw error;
   }
-
   await new Promise(resolve => setTimeout(resolve, 10000));
 });
 
