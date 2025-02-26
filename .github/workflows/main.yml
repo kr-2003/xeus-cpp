@@ -258,9 +258,17 @@ jobs:
       - name: Run Playwright UI Tests
         shell: bash -l {0}
         run: |
-          # Install Node.js
-          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-          sudo apt-get install -y nodejs
+          # Install Node.js based on OS
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            # On macOS, use Homebrew to install Node.js
+            brew install node@20
+            # Ensure node is in PATH
+            echo "/opt/homebrew/bin" >> $GITHUB_PATH  # For ARM macOS (like macos-15)
+          else
+            # On Linux, use NodeSource script
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+          fi
 
           # Navigate to ui-tests directory
           cd ui-tests
