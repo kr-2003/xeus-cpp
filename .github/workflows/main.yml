@@ -264,10 +264,12 @@ jobs:
             brew install node@20
             # Ensure node is in PATH
             echo "/opt/homebrew/bin" >> $GITHUB_PATH  # For ARM macOS (like macos-15)
+            echo "ARTIFACT_PATH=/Users/runner/work/xeus-cpp/xeus-cpp/ui-test/src" >> $GITHUB_ENV
           else
-            # On Linux, use NodeSource script
-            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-            sudo apt-get install -y nodejs
+            # On Linux, use pre-installed Node.js (no install needed)
+            node -v  # Verify Node.js is available
+            npm -v   # Verify npm is available
+            echo "ARTIFACT_PATH=/home/runner/work/xeus-cpp/xeus-cpp/ui-test/src" >> $GITHUB_ENV
           fi
 
           # Navigate to ui-tests directory
@@ -285,7 +287,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-test-results-${{ matrix.os }}
-          path: /Users/runner/work/xeus-cpp/xeus-cpp/ui-test/src/
+          path: ${{ env.ARTIFACT_PATH }}
           retention-days: 7
 
       - name: Setup tmate session
