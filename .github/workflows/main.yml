@@ -266,7 +266,7 @@ jobs:
           cd ui-tests
 
           # Install Playwright dependencies
-          npm install
+          npm install -D @playwright/test
           npx playwright install --with-deps
 
           # Run Playwright tests
