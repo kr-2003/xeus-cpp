@@ -255,6 +255,32 @@ jobs:
           python -m pip install jupyterlite-xeus
           jupyter lite build --XeusAddon.prefix=${{ env.PREFIX }}
 
+      - name: Run Playwright UI Tests
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/ui-testing' }}
+        shell: bash -l {0}
+        run: |
+          # Install Node.js
+          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+
+          # Navigate to ui-tests directory
+          cd ui-tests
+
+          # Install Playwright dependencies
+          npm install
+          npx playwright install --with-deps
+
+          # Run Playwright tests
+          npx playwright test
+
+      - name: Upload Playwright Test Results
+        if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/ui-testing' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results-${{ matrix.os }}
+          path: ui-tests/test-results/
+          retention-days: 7
+
       - name: Setup tmate session
         if: ${{ failure() && runner.debug }}
         uses: mxschmitt/action-tmate@v3
