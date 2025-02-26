@@ -8,7 +8,7 @@ export default defineConfig({
     baseURL: 'http://localhost:8000',
     headless: true, // Set to false for debugging
     screenshot: 'only-on-failure',
-    video: 'on',
+    video: 'retain-on-failure',
   },
   projects: [
     {
