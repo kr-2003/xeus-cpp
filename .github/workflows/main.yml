@@ -256,7 +256,6 @@ jobs:
           jupyter lite build --XeusAddon.prefix=${{ env.PREFIX }}
 
       - name: Run Playwright UI Tests and Upload Results
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/ui-testing' }}
         shell: bash -l {0}
         run: |
           # Install Node.js based on OS
