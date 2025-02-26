@@ -55,9 +55,7 @@ test.describe('xeus-cpp-lite UI Test', () => {
 
     await page.waitForSelector('.jp-Notebook', { timeout: 10000 });
 
-    const code = `
-      ?std::vector
-    `;
+    const code = `?std::vector`;
     await page.locator('.jp-CodeMirrorEditor').first().click();
     await page.keyboard.type(code);
 
