@@ -285,7 +285,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-test-results-${{ matrix.os }}
-          path: ./src/xeus-cpp.spec.ts-snapshots/
+          path: /Users/runner/work/xeus-cpp/xeus-cpp/ui-test/src/
           retention-days: 7
 
       - name: Setup tmate session
