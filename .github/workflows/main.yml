@@ -280,13 +280,13 @@ jobs:
           # Run Playwright tests
           npx playwright test
 
-      # - name: Upload Playwright Test Results
-      #   if: ${{ always() }}
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: playwright-test-results-${{ matrix.os }}
-      #     path: /Users/runner/work/xeus-cpp/xeus-cpp/ui-test/src/
-      #     retention-days: 7
+      - name: Upload Playwright Test Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results-${{ matrix.os }}
+          path: /Users/runner/work/xeus-cpp/xeus-cpp/ui-test/src/
+          retention-days: 7
 
       - name: Setup tmate session
         if: ${{ failure() && runner.debug }}
