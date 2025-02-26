@@ -45,7 +45,7 @@ test.describe('xeus-cpp-lite UI Test', () => {
     expect(screenshot).toMatchSnapshot('xeus-cpp-hello-output.png');
   });
 
-  test.describe('xeus-cpp-lite should inspect documentation', async ({ page }) => {
+  test('xeus-cpp-lite should inspect documentation', async ({ page }) => {
     
     await page.goto(`${JUPYTERLITE_URL}/lab/index.html`, { timeout: 10000 });
 
