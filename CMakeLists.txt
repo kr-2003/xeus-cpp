@@ -193,6 +193,7 @@ set(XEUS_CPP_HEADERS
     include/xeus-cpp/xmagics.hpp
     include/xeus-cpp/xoptions.hpp
     include/xeus-cpp/xpreamble.hpp
+    include/xeus-cpp/xdebugger.hpp
     #src/xinspect.hpp
     #src/xsystem.hpp
     #src/xparser.hpp
@@ -207,6 +208,9 @@ set(XEUS_CPP_SRC
     src/xparser.cpp
     src/xutils.cpp
     src/xmagics/os.cpp
+    src/xdebugger.cpp
+    src/xinternal_utils.cpp
+    src/xdebuglldb_client.cpp
 )
 
 if(NOT EMSCRIPTEN)
@@ -459,11 +463,13 @@ include(CMakePackageConfigHelpers)
 
 set(XEUS_CPP_CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE STRING "install path for xeus-cppConfig.cmake")
 
-install(DIRECTORY ${XCPP_TAGFILES_DIR}
-        DESTINATION ${XEUS_CPP_DATA_DIR})
+if(NOT EMSCRIPTEN)
+    install(DIRECTORY ${XCPP_TAGFILES_DIR}
+            DESTINATION ${XEUS_CPP_DATA_DIR})
 
-install(DIRECTORY ${XCPP_TAGCONFS_DIR}
-        DESTINATION ${XEUS_CPP_CONF_DIR})
+    install(DIRECTORY ${XCPP_TAGCONFS_DIR}
+            DESTINATION ${XEUS_CPP_CONF_DIR})
+endif()
 
 # Install xeus-cpp and xeus-cpp-static
 if (XEUS_CPP_BUILD_SHARED)
