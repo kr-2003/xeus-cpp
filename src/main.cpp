@@ -30,6 +30,8 @@
 #include "xeus-cpp/xutils.hpp"
 #include "xeus-cpp/xdebugger.hpp"
 
+#include "xcppinterop_client.hpp"
+
 namespace nl = nlohmann;
 
 int main(int argc, char* argv[])
@@ -69,6 +71,16 @@ int main(int argc, char* argv[])
     std::string file_name = xeus::extract_filename(argc, argv);
     auto interpreter = std::make_unique<xcpp::interpreter>(argc, argv);
     std::unique_ptr<xeus::xcontext> context = xeus::make_zmq_context();
+
+    auto cppinterop_client = std::make_shared<xcpp::CppInterOpClient>();
+    if (!cppinterop_client->initialize())
+    {
+        std::cerr << "Failed to initialize CppInterOpClient" << std::endl;
+        return 1;
+    }
+
+    interpreter->set_cppinterop_client(cppinterop_client);
+
 
     if (!file_name.empty())
     {

@@ -30,12 +30,15 @@ namespace nl = nlohmann;
 
 namespace xcpp
 {
+    class CppInterOpClient;
     class XEUS_CPP_API interpreter : public xeus::xinterpreter
     {
     public:
 
         interpreter(int argc, const char* const* argv);
         virtual ~interpreter();
+
+        void set_cppinterop_client(std::shared_ptr<CppInterOpClient> client);
 
         void publish_stdout(const std::string&);
         void publish_stderr(const std::string&);
@@ -87,6 +90,8 @@ namespace xcpp
 
         xoutput_buffer m_cout_buffer;
         xoutput_buffer m_cerr_buffer;
+
+        std::shared_ptr<CppInterOpClient> m_cppinterop_client;
     };
 }
 

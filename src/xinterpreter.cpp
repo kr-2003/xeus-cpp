@@ -27,46 +27,14 @@
 
 using Args = std::vector<const char*>;
 
-void* createInterpreter(const Args &ExtraArgs = {}) {
-  Args ClangArgs = {/*"-xc++"*/"-v"};
-  if (std::find_if(ExtraArgs.begin(), ExtraArgs.end(), [](const std::string& s) {
-    return s == "-resource-dir";}) == ExtraArgs.end()) {
-    std::string resource_dir = Cpp::DetectResourceDir();
-    if (!resource_dir.empty()) {
-        ClangArgs.push_back("-resource-dir");
-        ClangArgs.push_back(resource_dir.c_str());
-    } else {
-        std::cerr << "Failed to detect the resource-dir\n";
-    }
-  }
-  std::vector<std::string> CxxSystemIncludes;
-  Cpp::DetectSystemCompilerIncludePaths(CxxSystemIncludes);
-  for (const std::string& CxxInclude : CxxSystemIncludes) {
-    ClangArgs.push_back("-isystem");
-    ClangArgs.push_back(CxxInclude.c_str());
-  }
-  ClangArgs.insert(ClangArgs.end(), ExtraArgs.begin(), ExtraArgs.end());
-  // FIXME: We should process the kernel input options and conditionally pass
-  // the gpu args here.
-  return Cpp::CreateInterpreter(ClangArgs/*, {"-cuda"}*/);
-}
+
+#include "xeus-cpp/xshared_memory.hpp"
+#include "xcppinterop_client.hpp"
 
 using namespace std::placeholders;
 
 namespace xcpp
 {
-    struct StreamRedirectRAII {
-      std::string &err;
-      StreamRedirectRAII(std::string &e) : err(e) {
-        Cpp::BeginStdStreamCapture(Cpp::kStdErr);
-        Cpp::BeginStdStreamCapture(Cpp::kStdOut);
-      }
-      ~StreamRedirectRAII() {
-        std::string out = Cpp::EndStdStreamCapture();
-        err = Cpp::EndStdStreamCapture();
-        std::cout << out;
-      }
-    };
 
     void interpreter::configure_impl()
     {
@@ -96,8 +64,8 @@ int __get_cxx_version () {
   }
 __get_cxx_version ()
       )";
-        auto cxx_version = Cpp::Evaluate(code);
-        return std::to_string(cxx_version);
+
+        return "17";
     }
 
     interpreter::interpreter(int argc, const char* const* argv) :
@@ -108,8 +76,6 @@ __get_cxx_version ()
         , m_cerr_buffer(std::bind(&interpreter::publish_stderr, this, _1))
     {
         //NOLINTNEXTLINE (cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        createInterpreter(Args(argv ? argv + 1 : argv, argv + argc));
-        m_version = get_stdopt();
         redirect_output();
         init_preamble();
         init_magic();
@@ -118,6 +84,12 @@ __get_cxx_version ()
     interpreter::~interpreter()
     {
         restore_output();
+    }
+
+    void interpreter::set_cppinterop_client(std::shared_ptr<CppInterOpClient> client)
+    {
+        m_cppinterop_client = std::move(client);
+        m_version = get_stdopt();
     }
 
     void interpreter::execute_request_impl(
@@ -162,13 +134,17 @@ __get_cxx_version ()
             std::cerr.rdbuf(&null);
         }
 
-        std::string err;
+        std::string output, err;
 
         // Attempt normal evaluation
         try
         {
-            StreamRedirectRAII R(err);
-            compilation_result = Cpp::Process(code.c_str());
+            compilation_result = m_cppinterop_client->processCode(code, output, err);
+
+            // Print output to stdout
+            if (!output.empty()) {
+                std::cout << output;
+            }
         }
         catch (std::exception& e)
         {
