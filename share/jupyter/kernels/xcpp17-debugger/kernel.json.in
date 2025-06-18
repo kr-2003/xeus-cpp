@@ -1,5 +1,5 @@
 {
-  "display_name": "C++17",
+  "display_name": "C++17-Debugger",
   "env": {
       "PATH":"@XEUS_CPP_PATH@",
       "LD_LIBRARY_PATH":"@XEUS_CPP_LD_LIBRARY_PATH@"
@@ -8,6 +8,8 @@
       "@XEUS_CPP_KERNELSPEC_PATH@xcpp",
       "-f",
       "{connection_file}",
+      "-gdwarf-4",
+      "-O0",
       "-resource-dir", "@XEUS_CPP_RESOURCE_DIR@",
       "-I", "@XEUS_CPP_INCLUDE_DIR@",
       "-std=c++17"
