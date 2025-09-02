@@ -180,6 +180,7 @@ else()
     configure_native_kernel("/share/jupyter/kernels/xcpp17/")
     configure_native_kernel("/share/jupyter/kernels/xcpp20/")
     configure_native_kernel("/share/jupyter/kernels/xcpp23/")
+    configure_native_kernel("/share/jupyter/kernels/xcpp17-debugger/")
 endif()
 
 # Source files
@@ -196,6 +197,8 @@ set(XEUS_CPP_HEADERS
     include/xeus-cpp/xmagics.hpp
     include/xeus-cpp/xoptions.hpp
     include/xeus-cpp/xpreamble.hpp
+    include/xeus-cpp/xdebugger.hpp
+    include/xeus-cpp/xshared_memory.hpp
     #src/xinspect.hpp
     #src/xsystem.hpp
     #src/xparser.hpp
@@ -210,6 +213,10 @@ set(XEUS_CPP_SRC
     src/xparser.cpp
     src/xutils.cpp
     src/xmagics/os.cpp
+    src/xdebugger.cpp
+    src/xinternal_utils.cpp
+    src/xdebuglldb_client.cpp
+    src/xcppinterop_process.cpp
 )
 
 if(NOT EMSCRIPTEN)
@@ -468,11 +475,13 @@ include(CMakePackageConfigHelpers)
 
 set(XEUS_CPP_CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE STRING "install path for xeus-cppConfig.cmake")
 
-install(DIRECTORY ${XCPP_TAGFILES_DIR}
-        DESTINATION ${XEUS_CPP_DATA_DIR})
+if(NOT EMSCRIPTEN)
+    install(DIRECTORY ${XCPP_TAGFILES_DIR}
+            DESTINATION ${XEUS_CPP_DATA_DIR})
 
-install(DIRECTORY ${XCPP_TAGCONFS_DIR}
-        DESTINATION ${XEUS_CPP_CONF_DIR})
+    install(DIRECTORY ${XCPP_TAGCONFS_DIR}
+            DESTINATION ${XEUS_CPP_CONF_DIR})
+endif()
 
 # Install xeus-cpp and xeus-cpp-static
 if (XEUS_CPP_BUILD_SHARED)
@@ -512,6 +521,65 @@ if(XEUS_CPP_BUILD_EXECUTABLE OR EMSCRIPTEN)
                 PATTERN "*.in" EXCLUDE)
     endif ()
 endif ()
+
+# cppinterop_process executable
+# =============================
+
+if (XEUS_CPP_BUILD_EXECUTABLE AND NOT EMSCRIPTEN)
+    # Define source files for cppinterop_process
+    set(CPPINTEROP_PROCESS_SRC
+        src/xcppinterop_process.cpp  # You'll need to create this file
+        # Add any other source files needed for the process
+        ${XEUS_CPP_HEADERS}
+    )
+    
+    add_executable(cppinterop_process ${CPPINTEROP_PROCESS_SRC})
+
+    # Add xeus-cpp include directory
+    target_include_directories(cppinterop_process
+        PRIVATE
+        ${XEUS_CPP_INCLUDE_DIR}
+    )
+    
+    # Set common compile options
+    xeus_cpp_set_common_options(cppinterop_process)
+
+    target_compile_options(cppinterop_process PRIVATE
+        -gdwarf-4    # Generate DWARF-4 debug information
+        -O0          # Disable optimization
+    )
+    
+    # Link with necessary libraries
+    target_link_libraries(cppinterop_process PRIVATE 
+        clangCppInterOp 
+        ${CMAKE_THREAD_LIBS_INIT}
+    )
+    
+    # Add any additional libraries needed for shared memory, etc.
+    if(CMAKE_DL_LIBS)
+        target_link_libraries(cppinterop_process PRIVATE ${CMAKE_DL_LIBS} util)
+    endif()
+    
+    # Set target properties
+    set_target_properties(cppinterop_process PROPERTIES
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+    )
+    
+    if (APPLE)
+        set_target_properties(cppinterop_process PROPERTIES
+            MACOSX_RPATH ON
+        )
+    else()
+        set_target_properties(cppinterop_process PROPERTIES
+            BUILD_WITH_INSTALL_RPATH 1
+            SKIP_BUILD_RPATH FALSE
+        )
+    endif()
+    
+    # Install the executable
+    install(TARGETS cppinterop_process
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 
 # Configure 'xeus-cppConfig.cmake' for a build tree
 set(XEUS_CPP_CONFIG_CODE "####### Expanded from \@XEUS_CPP_CONFIG_CODE\@ #######\n")
